@@ -2,7 +2,9 @@ library(MASS)
 library(rjags)
 library(tools)
 
-setwd("~/Github/STÆ004F")
+setwd("~/Github/STAE004F/hw1")
+
+set.seed(1)
 
 ## Part (c)
 
@@ -45,7 +47,7 @@ log_tau_post <- sapply(tau_vec, function(tau) {
   Qxy <- sigma^-2 * n * Qxy + Qx
   
   mu_xy <- solve(Qxy, sigma^-2 * t(Z) %*% y)
-  log_tau <- -Q * log(tau) - 1/2 * log(det(Qxy)) + (sigma^-2/2 * t(mu_xy) %*% t(Z) %*% y - 2 * tau)
+  log_tau <- -Q * log(tau) - 1/2 * log(det(Qxy)) + (sigma^-2/2 * t(mu_xy) %*% t(Z) %*% y - 1/2 * tau)
   return(log_tau)
 })
 
@@ -69,7 +71,7 @@ log_like  <- function(theta) {
   Qxy <- Qx + sigma^-2 * t(Z) %*% Z
   mu_xy <- solve(Qxy, sigma^-2 * t(Z) %*% y)
 
-  return(-Q * theta - 1/2 * log(det(Qxy)) + (sigma^-2/2 * t(mu_xy) %*% t(Z) %*% y - 2 * exp(theta)))
+  return(-Q * theta - 1/2 * log(det(Qxy)) + (sigma^-2/2 * t(mu_xy) %*% t(Z) %*% y - 1/2 * exp(theta)))
 }
 
 log_post <- function(theta) { log_like(theta) + log_prior(theta) }
@@ -127,7 +129,7 @@ pdf("tau_densities.pdf")
 plot(tau_vec, tau_prior, lwd = 1.5, type = "l", xlab = expression(tau), ylab = "Density", ylim = range(0, 4.5), lty = 2)
 lines(tau_vec, tau_post, lwd = 1.5)
 legend("topright", inset = c(0.025, 0.025), bty = "n", lty = c(2, 1), legend = c("Prior", "Posterior"))
-lines(density(runjags::combine.mcmc(chains)[,"tau"]), lty = 2, col = "red")
+lines(density(runjags::combine.mcmc(chains)[,"tau"], adjust = 3), lty = 2, col = "red")
 dev.off()
 
 # present random effects in a figure (posterior median + 95% CI vs. cat. no.)
